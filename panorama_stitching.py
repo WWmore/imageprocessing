@@ -7,13 +7,14 @@ from read_files import read_csv
 from crop_patch import crop_image
 
 class RectangularPatch:
+    ### Set given angle and photo numbers
+    theta =  (180-150.4)/180*np.pi
+    n = 8
+    
     def __init__(self, path, img, is_drill=False):
         self.path = path
-        self.is_drill = is_drill
-
-        ### Set given angle and photo numbers
-        self.theta =  (180-150.4)/180*np.pi
-        self.n = 8
+        self.is_sign = -1 if is_drill else 1
+       
         self.alpha = 2*np.pi / self.n
 
         ### Read 1 image and get the cropped subimg
@@ -67,7 +68,8 @@ class RectangularPatch:
             circle_Hough(subimg)
         else:
             "use above function to get a constant circle of the first photo"
-            center, radius = np.array([244, 294]), 212
+            center = np.array([244, 294])
+            radius = 212 if self.is_sign==1 else 230
             # draw the outer circle
             cv2.circle(self.subimg,center,radius,(0,0,255),2)
             # draw the center of the circle
@@ -82,28 +84,16 @@ class RectangularPatch:
     def get_boundary_contour(self):
         center, radius = self.center, self.radius
 
-        if self.is_drill:
-            phi_bottom = read_csv(self.path, '\\phi_bottom.csv') + np.pi/2
-            phi_left = read_csv(self.path, '\\phi_left.csv') + np.pi/2
-            rho_left = read_csv(self.path, '\\rho_left.csv')
-            phi_right = read_csv(self.path, '\\phi_right.csv') + np.pi/2
-            rho_right = read_csv(self.path, '\\rho_right.csv')
+        phi_bottom = read_csv(self.path, '\\phi_bottom.csv') * self.is_sign + np.pi/2
+        phi_left = read_csv(self.path, '\\phi_left.csv') * self.is_sign + np.pi/2
+        rho_left = read_csv(self.path, '\\rho_left.csv')
+        phi_right = read_csv(self.path, '\\phi_right.csv') * self.is_sign + np.pi/2
+        rho_right = read_csv(self.path, '\\rho_right.csv')
 
-            ### Plot the polyline
-            pts_bottom = np.c_[(radius * np.cos(phi_bottom)).astype(int), (radius * np.sin(phi_bottom)).astype(int)]
-            pts_left = np.c_[(radius * rho_left * np.cos(phi_left)).astype(int), (radius * rho_left * np.sin(phi_left)).astype(int)]
-            pts_right = np.c_[(radius * rho_right * np.cos(phi_right)).astype(int), (radius * rho_right * np.sin(phi_right)).astype(int)]
-        else:
-            "ball, front view"
-            ### Read TOP, Bottom, Left-polyline-pts coodinate
-            phi_bottom = read_csv(self.path, '\\phi_bottom.csv') + np.pi/2
-            phi_left = read_csv(self.path, '\\phi_left.csv') + np.pi/2
-            rho_left = read_csv(self.path, '\\rho_left.csv')
-
-            ### Plot the polyline
-            pts_bottom = np.c_[(radius * np.cos(phi_bottom)).astype(int), (radius * np.sin(phi_bottom)).astype(int)]
-            pts_left = np.c_[(radius * rho_left * np.cos(phi_left)).astype(int), (radius * rho_left * np.sin(phi_left)).astype(int)]
-            pts_right = np.c_[-pts_left[:,0], pts_left[:,1]]
+        ### Plot the polyline
+        pts_bottom = np.c_[(radius * np.cos(phi_bottom)).astype(int), (radius * np.sin(phi_bottom)).astype(int)]
+        pts_left = np.c_[(radius * rho_left * np.cos(phi_left)).astype(int), (radius * rho_left * np.sin(phi_left)).astype(int)]
+        pts_right = np.c_[(radius * rho_right * np.cos(phi_right)).astype(int), (radius * rho_right * np.sin(phi_right)).astype(int)]
 
         # bdry_pts = center + np.vstack((pts_bottom[::-1], pts_left, pts_right))
 
@@ -129,7 +119,8 @@ class RectangularPatch:
 
     def get_cropped_patch(self):
         ### Extract cropped patch:
-        phi_bdry = read_csv(self.path, '\\phi_bdry.csv') + np.pi/2
+        phi_bdry = read_csv(self.path, '\\phi_bdry.csv') * self.is_sign + np.pi/2
+
         rho_bdry = read_csv(self.path, '\\rho_bdry.csv')
 
         pts_bdry = np.c_[(self.radius * rho_bdry * np.cos(phi_bdry)).astype(int), (self.radius * rho_bdry * np.sin(phi_bdry)).astype(int)]
@@ -170,23 +161,23 @@ class RectangularPatch:
         return out
         
     def get_rectangular_patch(self):
-        phi = read_csv(self.path, '\\patch_list1_phi.csv') + np.pi/2
+        phi = read_csv(self.path, '\\patch_list1_phi.csv') * self.is_sign + np.pi/2
         rho = read_csv(self.path, '\\patch_list1_r.csv')
         pts_list1 = self.get_list_of_pts(phi, rho)
 
-        phi = read_csv(self.path, '\\patch_list2_phi.csv') + np.pi/2
+        phi = read_csv(self.path, '\\patch_list2_phi.csv') * self.is_sign + np.pi/2
         rho = read_csv(self.path, '\\patch_list2_r.csv')
         pts_list2 = self.get_list_of_pts(phi, rho)
 
-        phi = read_csv(self.path, '\\patch_list3_phi.csv') + np.pi/2
+        phi = read_csv(self.path, '\\patch_list3_phi.csv') * self.is_sign + np.pi/2
         rho = read_csv(self.path, '\\patch_list3_r.csv')
         pts_list3 = self.get_list_of_pts(phi, rho)
 
-        phi = read_csv(self.path, '\\patch_list4_phi.csv') + np.pi/2
+        phi = read_csv(self.path, '\\patch_list4_phi.csv') * self.is_sign + np.pi/2
         rho = read_csv(self.path, '\\patch_list4_r.csv')
         pts_list4 = self.get_list_of_pts(phi, rho)
 
-        phi = read_csv(self.path, '\\patch_list5_phi.csv') + np.pi/2
+        phi = read_csv(self.path, '\\patch_list5_phi.csv') * self.is_sign + np.pi/2
         rho = read_csv(self.path, '\\patch_list5_r.csv')
         pts_list5 = self.get_list_of_pts(phi, rho)
 
@@ -216,8 +207,10 @@ class RectangularPatch:
         s3 = self.strip(pts_list3, pts_list4, output_pts, width, height)
         s4 = self.strip(pts_list4, pts_list5, output_pts, width, height)
 
-        patch_fliped = cv2.hconcat([s1,s2,s3,s4])
-        patch = cv2.flip(patch_fliped, 1)
+        patch = cv2.hconcat([s1,s2,s3,s4])
+
+        if self.is_sign==1:
+            patch = cv2.flip(patch, 1)
 
         cv2.imshow("Rectangular Patch" , patch)
         cv2.waitKey(0)
@@ -229,14 +222,9 @@ class RectangularPatch:
 
 if __name__ == "__main__":
 
-    ## read photo
-    # path0 = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\ball_photos'
-    # path = r'C:\\Users\\WANGH0M\\Desktop\\ball_drillbit\\ball\\0'
-    # name = '\\0B4A4651.jpg'
-
-    is_drill = False
     if 0:
         path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\ball_photos'
+        is_drill = False
     else:
         path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\drill_photos'
         is_drill = True
@@ -250,9 +238,9 @@ if __name__ == "__main__":
         print(i)
         if i==0:
             patch = RectangularPatch(path, img, is_drill).patch
-        # else:
-        #     pat = RectangularPatch(path, img, is_drill).patch
-        #     patch = cv2.hconcat([pat, patch])
+        else:
+            pat = RectangularPatch(path, img, is_drill).patch
+            patch = cv2.hconcat([pat, patch])
         i += 1
 
     cv2.imshow("Panorama" , patch)
