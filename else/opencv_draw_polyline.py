@@ -3,11 +3,15 @@ import numpy as np
 
 # path
 
-path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\gfg.png'
+#path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\gfg.png'
  
 # Reading an image in default
-image = cv2.imread(path)
+image = cv2.imread('gfg.png')
  
+cv2.imshow('image', image)
+cv2.waitKey()
+cv2.destroyAllWindows()
+
 # Window name in which image is
 # displayed
 window_name = 'Image'
@@ -46,15 +50,9 @@ cv2.destroyAllWindows()
 # Python program to explain
 # cv2.polylines() method
 
-import cv2
-import numpy as np
-
-# path
-path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\gfg.png'
-
 # Reading an image in default
 # mode
-image = cv2.imread(path)
+image = cv2.imread('gfg.png')
 
 # Window name in which image is
 # displayed

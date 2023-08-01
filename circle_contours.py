@@ -1,7 +1,6 @@
-
-
 import numpy as np
 import cv2
+
 
 
 def circle_Hough(subimg):
@@ -10,9 +9,14 @@ def circle_Hough(subimg):
     """
     gray_img = cv2.cvtColor(subimg, cv2.COLOR_BGR2GRAY)
     bimg = cv2.medianBlur(gray_img, 5)
-    cimg = cv2.cvtColor(bimg, cv2.COLOR_GRAY2BGR)
+    # cimg = cv2.cvtColor(bimg, cv2.COLOR_GRAY2BGR)
 
-    circles = cv2.HoughCircles(bimg,cv2.HOUGH_GRADIENT,1,120, param1=100,param2=30,minRadius=0, maxRadius=0)
+    width, height = subimg.shape[0], subimg.shape[1]
+    maxR = max(width//2, height//2)
+    minR = min(width//5, height//5)
+    circles = cv2.HoughCircles(bimg,cv2.HOUGH_GRADIENT,1.2,120, 
+                               param1=100,param2=30,
+                               minRadius=minR, maxRadius=maxR)
     circles = np.uint16(np.around(circles))
 
     def circle_detection(circles):
@@ -25,8 +29,13 @@ def circle_Hough(subimg):
             # draw the center of the circle
             cv2.circle(subimg,(i[0],i[1]),2,(0,0,255),3)
 
-    centroid = np.array([int(subimg.shape[0]/2), int(subimg.shape[1]/2)])
-    dist = max(subimg.shape[0], subimg.shape[1])
+    # circle_detection(circles)
+    # cv2.imshow("Contours",subimg)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    centroid = np.array([subimg.shape[0]//2, subimg.shape[1]//2])
+    dist = np.sqrt((subimg.shape[0])**2 + (subimg.shape[1])**2)
     index = 0
     for i, c in enumerate(circles[0,:]):
         d = np.linalg.norm(np.array([c[0], c[1]])-centroid)
@@ -48,8 +57,76 @@ def circle_Hough(subimg):
     cv2.imshow("Contours",subimg)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    return center, radius
 
 
+def circle_blob(subimg):
+    "https://learnopencv.com/blob-detection-using-opencv-python-c/"
+    "note suitable for multi-small circles, since blob=ban dian in Chinese"
+
+    # Read image
+    ##im = cv2.imread(name, cv2.IMREAD_GRAYSCALE)
+
+    subimg = cv2.cvtColor(subimg, cv2.COLOR_BGR2GRAY)
+
+    def parameter():
+        # Setup SimpleBlobDetector parameters.
+        params = cv2.SimpleBlobDetector_Params()
+        
+        # Change thresholds
+        params.minThreshold = 10
+        params.maxThreshold = 200
+        
+        # Filter by Area.
+        params.filterByArea = True
+        params.minArea = 100
+        params.maxArea = 1000
+        
+        # Filter by Circularity
+        params.filterByCircularity = True
+        params.minCircularity = 0.1
+        params.maxCircularity = 1
+        
+        # Filter by Convexity
+        params.filterByConvexity = True
+        params.minConvexity = 0.87
+        params.maxConvexity = 1
+        
+        # Filter by Inertia
+        params.filterByInertia = True
+        params.minInertiaRatio = 0.1
+        params.maxInertiaRatio = 1
+
+        return params
+    
+    # Set up the detector with default parameters.
+    params = parameter()
+    # Create a detector with the parameters
+    ver = (cv2.__version__).split('.')
+    print(int(ver[0]))
+    if int(ver[0]) < 3 :
+        detector = cv2.SimpleBlobDetector(params)
+    else : 
+        detector = cv2.SimpleBlobDetector_create(params)
+    
+    if 1: 
+        # Detect blobs.
+        keypoints = detector.detect(subimg)
+    else:
+        # Apply Laplacian of Gaussian
+        blobs_log = cv2.Laplacian(subimg, cv2.CV_64F)
+        blobs_log = np.uint8(np.absolute(blobs_log))
+        keypoints = detector.detect(blobs_log)
+    
+    # Draw detected blobs as red circles.
+    # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
+    im_with_keypoints = cv2.drawKeypoints(subimg, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    
+    # Show keypoints
+    cv2.imshow("Keypoints", im_with_keypoints)
+    cv2.waitKey(0)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def circle_moment(subimg): ## no use
@@ -82,6 +159,7 @@ def circle_moment(subimg): ## no use
 
 
 def circle_contour(subimg): ## no use
+    "from 03_06_compute_contour.py, 03_07_contour_centroid.py"
     gray_img = cv2.cvtColor(subimg, cv2.COLOR_BGR2GRAY)
     ## another way: build Gaussian threshold (refer 03_06.py)
     thresh = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 115, 1)
@@ -116,3 +194,25 @@ def circle_match(path, subimg): ## no use
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+
+#--------------------------------------------------------------------------------
+
+def rescale(img):
+    ## rescale the photo
+    img = cv2.resize(img, (0,0), fx=0.1, fy=0.1)
+    return img
+
+def crop(img):
+    ## crop the photo
+    num_row, num_col = img.shape[0], img.shape[1]
+    subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
+    return subimg
+
+name = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\ball_photos\\0B4A4667.jpg'
+img = cv2.imread(name,1)
+img = rescale(img)
+subimg = crop(img)
+#circle_blob(subimg)
+
+circle_Hough(subimg)

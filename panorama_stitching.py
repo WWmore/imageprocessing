@@ -63,9 +63,9 @@ class RectangularPatch:
         return gray_img
 
     def get_bounding_circle(self):
-        if False:
+        if True:
             "computed way"
-            circle_Hough(subimg)
+            center, radius = circle_Hough(self.subimg)
         else:
             "use above function to get a constant circle of the first photo"
             center = np.array([244, 294])
@@ -110,9 +110,9 @@ class RectangularPatch:
         ply3 = cv2.polylines(self.subimg, [pts3], isClosed, (255, 0, 0), thickness=2)
         
         # Displaying the image (Note these polys will appear in the later extracted-subimg)
-        cv2.imshow('Contour', ply1)
-        cv2.imshow('Contour', ply2)
-        cv2.imshow('Contour', ply3)
+        cv2.imshow(self.path, ply1)
+        cv2.imshow(self.path, ply2)
+        cv2.imshow(self.path, ply3)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -222,7 +222,7 @@ class RectangularPatch:
 
 if __name__ == "__main__":
 
-    if 0:
+    if 1:
         path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\ball_photos'
         is_drill = False
     else:
