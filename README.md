@@ -6,5 +6,5 @@
 3. python3 --version
 4. pip install --upgrade pip
 5. pip install opencv-contrib-python
-6. conda install 
+6. conda install numpy (or else)
 
