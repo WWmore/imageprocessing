@@ -7,39 +7,39 @@ from read_files import read_csv
 from crop_patch import crop_image
 
 def ReadPatchContour(path, is_drill):
-    path += '\\csv_bigpatch'
+    path += '/csv_bigpatch'
     is_sign = -1 if is_drill else 1
 
     data = {
-        'phi_bottom': read_csv(path, '\\phi_bottom.csv') * is_sign + np.pi/2,
-        'phi_left': read_csv(path, '\\phi_left.csv') * is_sign + np.pi/2,
-        'rho_left':  read_csv(path, '\\rho_left.csv'),
-        'phi_right':  read_csv(path, '\\phi_right.csv') * is_sign + np.pi/2,
-        'rho_right':  read_csv(path, '\\rho_right.csv'),
+        'phi_bottom': read_csv(path, '/phi_bottom.csv') * is_sign + np.pi/2,
+        'phi_left': read_csv(path, '/phi_left.csv') * is_sign + np.pi/2,
+        'rho_left':  read_csv(path, '/rho_left.csv'),
+        'phi_right':  read_csv(path, '/phi_right.csv') * is_sign + np.pi/2,
+        'rho_right':  read_csv(path, '/rho_right.csv'),
 
-        'phi_bdry':  read_csv(path, '\\phi_bdry.csv') * is_sign + np.pi/2,
-        'rho_bdry':  read_csv(path, '\\rho_bdry.csv'),
+        'phi_bdry':  read_csv(path, '/phi_bdry.csv') * is_sign + np.pi/2,
+        'rho_bdry':  read_csv(path, '/rho_bdry.csv'),
 
-        'phi1':  read_csv(path, '\\patch_list1_phi.csv') * is_sign + np.pi/2,
-        'rho1':  read_csv(path, '\\patch_list1_r.csv'),
+        'phi1':  read_csv(path, '/patch_list1_phi.csv') * is_sign + np.pi/2,
+        'rho1':  read_csv(path, '/patch_list1_r.csv'),
 
-        'phi2':  read_csv(path, '\\patch_list2_phi.csv') * is_sign + np.pi/2,
-        'rho2':  read_csv(path, '\\patch_list2_r.csv'),
+        'phi2':  read_csv(path, '/patch_list2_phi.csv') * is_sign + np.pi/2,
+        'rho2':  read_csv(path, '/patch_list2_r.csv'),
 
-        'phi3':  read_csv(path, '\\patch_list3_phi.csv') * is_sign + np.pi/2,
-        'rho3':  read_csv(path, '\\patch_list3_r.csv'),
+        'phi3':  read_csv(path, '/patch_list3_phi.csv') * is_sign + np.pi/2,
+        'rho3':  read_csv(path, '/patch_list3_r.csv'),
 
-        'phi4':  read_csv(path, '\\patch_list4_phi.csv') * is_sign + np.pi/2,
-        'rho4':  read_csv(path, '\\patch_list4_r.csv'),
+        'phi4':  read_csv(path, '/patch_list4_phi.csv') * is_sign + np.pi/2,
+        'rho4':  read_csv(path, '/patch_list4_r.csv'),
 
-        'phi5':  read_csv(path, '\\patch_list5_phi.csv') * is_sign + np.pi/2,
-        'rho5':  read_csv(path, '\\patch_list5_r.csv'),
+        'phi5':  read_csv(path, '/patch_list5_phi.csv') * is_sign + np.pi/2,
+        'rho5':  read_csv(path, '/patch_list5_r.csv'),
 
-        'phi6':  read_csv(path, '\\patch_list6_phi.csv') * is_sign + np.pi/2,
-        'rho6':  read_csv(path, '\\patch_list6_r.csv'),
+        'phi6':  read_csv(path, '/patch_list6_phi.csv') * is_sign + np.pi/2,
+        'rho6':  read_csv(path, '/patch_list6_r.csv'),
 
-        'phi7':  read_csv(path, '\\patch_list7_phi.csv') * is_sign + np.pi/2,
-        'rho7':  read_csv(path, '\\patch_list7_r.csv'),
+        'phi7':  read_csv(path, '/patch_list7_phi.csv') * is_sign + np.pi/2,
+        'rho7':  read_csv(path, '/patch_list7_r.csv'),
     }
 
     return data
@@ -106,10 +106,6 @@ class RectangularPatch:
         ## crop the photo
         num_row, num_col = img.shape[0], img.shape[1]
         subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
-
-        # cv2.imshow("Sub-image", subimg)
-        # cv2.waitKey()
-        # cv2.destroyAllWindows()
         return subimg
 
     def convert_grayscale(self, subimg):
@@ -165,9 +161,9 @@ class RectangularPatch:
         ply3 = cv2.polylines(self.subimg, [pts3], isClosed, (255, 0, 0), thickness=2)
         
         # Displaying the image (Note these polys will appear in the later extracted-subimg)
-        cv2.imshow(self.path, ply1)
-        cv2.imshow(self.path, ply2)
-        cv2.imshow(self.path, ply3)
+        cv2.imshow('Boundary', ply1)
+        cv2.imshow('Boundary', ply2)
+        cv2.imshow('Boundary', ply3)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -257,10 +253,11 @@ class RectangularPatch:
 
         patch = cv2.hconcat([s1,s2,s3,s4,s5,s6])
 
-        # if self.is_sign==1:
+        # if self.is_sign==1: 
+        #   "need to check if the image is flipped horizontally"
         #     patch = cv2.flip(patch, 1)
 
-        cv2.imshow("Rectangular Patch" , patch)
+        cv2.imshow("Patch" , patch)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -271,28 +268,30 @@ class RectangularPatch:
 if __name__ == "__main__":
 
     if 1:
-        path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\ball_photos'
+        path = './ball_photos'
         is_drill = False
     else:
-        path = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\drill_photos'
+        path = './drill_photos'
         is_drill = True
 
     data = ReadPatchContour(path, is_drill)
     
-    images = [cv2.imread(file) for file in glob.glob(path+"\\*.jpg")]
-    num_img = len(images)
-    # print(num_img)
+    images = [cv2.imread(file) for file in glob.glob(path+"/*.jpg")]
+    images = images[::-1]
 
-    i = 0
-    for img in images:
+    for i, img in enumerate(images):
         print(i)
         if i==0:
             patch = RectangularPatch(path, img, is_drill, **data).patch
+            cv2.imwrite(path + "/patch/1.png", patch)  
         else:
             pat = RectangularPatch(path, img, is_drill, **data).patch
-            patch = cv2.hconcat([pat, patch])
-        i += 1
+            name =  path + "/patch/" + str(i+1)
+            cv2.imwrite(name + ".png", pat)  
+            patch = cv2.hconcat([patch, pat])
 
+
+    cv2.imwrite(path + "/panorama.png", patch)  
     cv2.imshow("Panorama" , patch)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
