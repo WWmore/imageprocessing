@@ -1,6 +1,12 @@
+"__author__ = Hui Wang"
+
+""" Functions:
+ read_csv(path0, name)
+"""
 
 import numpy as np
 import csv 
+#-----------------------------------------------------------------------
 
 def read_csv(path0, name):
     arrays = []

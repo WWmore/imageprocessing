@@ -1,3 +1,10 @@
+"__author__ = Hui Wang"
+
+""" Functions:
+ReadPatchContour(path, is_drill)
+class RectangularPatch
+"""
+
 import numpy as np
 import cv2
 import glob
@@ -6,6 +13,7 @@ import glob
 from circle_contours import circle_Hough, circle_canny
 from read_files import read_csv
 from crop_patch import crop_image
+#-----------------------------------------------------------------------------------
 
 def ReadPatchContour(path, is_drill):
     path += '/csv_bigpatch'

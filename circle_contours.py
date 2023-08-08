@@ -1,3 +1,14 @@
+"__author__ = Hui Wang"
+
+""" Functions:
+circle_canny(img, is_crop=False, is_scale=False, is_RGB=False)
+circle_Hough(subimg)
+circle_blob(subimg)
+circle_moment(subimg)
+circle_contour(subimg)
+circle_match(path, subimg)
+"""
+
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
@@ -289,22 +300,24 @@ def circle_match(path, subimg): ## no use
 
 #--------------------------------------------------------------------------------
 
-def rescale(img):
-    ## rescale the photo
-    img = cv2.resize(img, (0,0), fx=0.1, fy=0.1)
-    return img
 
-def crop(img):
-    ## crop the photo
-    num_row, num_col = img.shape[0], img.shape[1]
-    subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
-    return subimg
+if __name__ == "__main__":
+    def rescale(img):
+        ## rescale the photo
+        img = cv2.resize(img, (0,0), fx=0.1, fy=0.1)
+        return img
 
-name = './ball_photos/0B4A4656.jpg'
-img = cv2.imread(name,1)
+    def crop(img):
+        ## crop the photo
+        num_row, num_col = img.shape[0], img.shape[1]
+        subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
+        return subimg
 
-#circle_blob(rescale(crop(img)))
+    name = './ball_photos/0B4A4656.jpg'
+    img = cv2.imread(name,1)
 
-#circle_Hough(rescale(crop(img)))
+    #circle_blob(rescale(crop(img)))
 
-circle_canny(img, True, True, True)
+    #circle_Hough(rescale(crop(img)))
+
+    circle_canny(img, True, True, True)

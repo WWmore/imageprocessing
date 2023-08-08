@@ -1,3 +1,5 @@
+"__author__ = Hui Wang"
+
 """
 The panorama stitching algorithm can be divided into four basic fundamental steps. These steps are as follows:
 
@@ -8,6 +10,12 @@ The homography matrix is then applied to the image to wrap and fit those images 
 
 """
 
+""" Functions:
+match_two_images(img1, img2)
+match_multi_patches(imgs)
+panorama1(folder_path)
+stitch_images(images)
+"""
 
 import numpy as np
 import cv2
@@ -158,20 +166,27 @@ def stitch_images(images):
     else:
         print('error happens')
 
-if True:
-    images = [cv2.imread(file) for file in glob.glob(path+"/*.png")]
-else:
-    image_path = glob.glob(path+"/*.png")
-    images = []
-    for image in image_path:
-        img = cv2.imread(image)
-        images.append(img)
-        cv2.imshow('Image', img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-#stitch_images(images)
 
 
-#panorama1('./else/tests')
-panorama1('./ball_photos/patch')
+if __name__ == "__main__":
+
+    path = './ball_photos/patch'
+
+    if True:
+        images = [cv2.imread(file) for file in glob.glob(path+"/*.png")]
+        images = [cv2.imread(path+'/1.png'), cv2.imread(path+'/2.png')]
+    else:
+        image_path = glob.glob(path+"/*.png")
+        images = []
+        for image in image_path:
+            img = cv2.imread(image)
+            images.append(img)
+            cv2.imshow('Image', img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+    stitch_images(images)
+
+
+    #panorama1(path)
+    #panorama1(path+'/only')

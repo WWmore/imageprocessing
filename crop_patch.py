@@ -1,7 +1,12 @@
+"__author__ = Hui Wang"
 
+""" Functions:
+crop_image(img, pts)
+"""
 
 import numpy as np
 import cv2
+#---------------------------------------------------------------------------------
 
 ### Extract cropped patch:
 
