@@ -1,9 +1,100 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
+#-------------------------------------------------------------------------------------
+
+def circle_canny(img, is_crop=False, is_scale=False, is_RGB=False):
+    """Use the Canny edge detection algorithm to detect edges in the image,
+    then search for the left boundary-edge and right boundary-edge to rebuld the circle
+    """
+    #img = cv2.imread(name)
+
+    if is_crop:
+        num_row, num_col = img.shape[0], img.shape[1]
+        img = img[:, int(num_col*0.2):int(num_col*0.8), :]
+
+    if is_scale:
+        # Define the scale percentage for resizing the image
+        scale_percent = 15.625  # 100% means keeping the original size, you can change this value
+        width = int(img.shape[1] * scale_percent / 100)  # Calculate the new width
+        height = int(img.shape[0] * scale_percent / 100)  # Calculate the new height
+        dim = (width, height)  # Create a tuple representing the new dimensions (width, height)
+
+        # Resize the image using the calculated dimensions and interpolation method (INTER_AREA)
+        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA) ##is around (853, 1280)
+    
+    if is_RGB:
+        # used for plt.imshow, otherwise cv2.imshow will turn to blue. Work inversely.
+        # Convert the color channels from RGB to BGR format (OpenCV uses BGR by default)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+    plt.imshow(img)
+
+    # Canny Parameters:
+    #   img: The input image on which edge detection will be performed.
+    #   40: The lower threshold value. This value determines the intensity gradient below which edges are not considered.
+    #   180: The upper threshold value. This value determines the intensity gradient above which edges are considered strong edges.
+    #   apertureSize: The size of the Sobel kernel used for edge detection. It can be 3, 5, or 7. A larger value gives smoother edges.
+    #   L2gradient: A Boolean flag to specify the gradient magnitude calculation method. If True, L2 norm (Euclidean distance) is used. If False, L1 norm (Manhattan distance) is used.
+    # (40,180) is suitable for the image size around (853, 1280)
+    edges = cv2.Canny(img, 40, 180,apertureSize=3, L2gradient=True)
+    plt.imshow(edges)
+
+    "Detecting the most left and right verticies of the sphere"
+    # Initialize an empty list to store the coordinates that meet the condition
+    coordinates = list()
+
+    # Get the shape of the 'edges' array (assuming 'edges' is a 2D array or matrix)
+    shape = edges.shape
+
+    # Iterate over rows (y) first
+    for x in range(shape[1]):
+        # Iterate over columns (x)
+        for y in range(shape[0]):
+            # Check if the current row 'y' is between 400 and 500 (exclusive)
+            if 400 < y < 500:
+                # Check if the value of the element at position (y, x) in the 'edges' array is greater than 250
+                if edges[y][x] > 250:
+                    # If the conditions are met, add the coordinate (y, x) to the 'coordinates' list
+                    coordinates.append((y, x))
+
+    "Finding the circle parameter, and drawing the circle"
+    # Calculate the diameter of the circle using the x-coordinates of the last and first elements in the 'coordinates' list
+    diameter = coordinates[-1][1] - coordinates[0][1]
+
+    # Calculate the radius of the circle by dividing the diameter by 2 and converting it to an integer
+    radius = int(diameter / 2)
+
+    # Calculate the x-coordinate of the center of the circle by taking the average of the x-coordinates of the last and first elements in the 'coordinates' list
+    center_x = (coordinates[-1][1] + coordinates[0][1]) / 2
+
+    # Calculate the y-coordinate of the center of the circle by taking the average of the y-coordinates of the last and first elements in the 'coordinates' list
+    center_y = int((coordinates[-1][0] + coordinates[0][0]) / 2)
+
+    # Create a tuple representing the center of the circle as (x, y)
+    center = (int(center_x), int(center_y))
+
+    # Set the color of the circle in BGR format (blue in this example, as (255, 0, 0))
+    color = (255, 0, 0)
+
+    # Create a copy of the original image to draw the circle on
+    image = img.copy()
+
+    # Draw the circle on the image using OpenCV's circle function
+    # center: the center coordinates of the circle
+    # radius: the radius of the circle
+    # color: the color of the circle
+    # thickness: the thickness of the circle outline (set to 2 in this example)
+    cv2.circle(image, center, radius, color, thickness=2)
+
+    # Display the image with the drawn circle using matplotlib
+    plt.imshow(image)
+
+    return center, radius
+#-------------------------------------------------------------------------------------
 
 
-def circle_Hough(subimg):
+def circle_Hough(subimg):## no use
     """ in a computing way
     another way: Circle detection (HoughCircles, refer to Learning OpenCV book)
     """
@@ -60,7 +151,7 @@ def circle_Hough(subimg):
     return center, radius
 
 
-def circle_blob(subimg):
+def circle_blob(subimg):## no use
     "https://learnopencv.com/blob-detection-using-opencv-python-c/"
     "note suitable for multi-small circles, since blob=ban dian in Chinese"
 
@@ -130,92 +221,6 @@ def circle_blob(subimg):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-def circle_canny(img, is_scale=False):
-    # Load the image from a file named "1.jpg"
-    #img = cv2.imread(name)
-
-    if is_scale:
-        # Convert the color channels from RGB to BGR format (OpenCV uses BGR by default)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-        # Define the scale percentage for resizing the image
-        scale_percent = 15.625  # 100% means keeping the original size, you can change this value
-        width = int(img.shape[1] * scale_percent / 100)  # Calculate the new width
-        height = int(img.shape[0] * scale_percent / 100)  # Calculate the new height
-        dim = (width, height)  # Create a tuple representing the new dimensions (width, height)
-
-        # Resize the image using the calculated dimensions and interpolation method (INTER_AREA)
-        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-
-    plt.imshow(img)
-    # cv2.waitKey()
-    # cv2.destroyAllWindows()
-
-
-    # Use the Canny edge detection algorithm to detect edges in the image 'img'
-    # Canny Parameters:
-    #   img: The input image on which edge detection will be performed.
-    #   40: The lower threshold value. This value determines the intensity gradient below which edges are not considered.
-    #   180: The upper threshold value. This value determines the intensity gradient above which edges are considered strong edges.
-    #   apertureSize: The size of the Sobel kernel used for edge detection. It can be 3, 5, or 7. A larger value gives smoother edges.
-    #   L2gradient: A Boolean flag to specify the gradient magnitude calculation method. If True, L2 norm (Euclidean distance) is used. If False, L1 norm (Manhattan distance) is used.
-
-    edges = cv2.Canny(img, 40, 180,apertureSize=3, L2gradient=True)
-    plt.imshow(edges)
-
-    "Detecting the most left and right verticies of the sphere"
-    # Initialize an empty list to store the coordinates that meet the condition
-    coordinates = list()
-
-    # Get the shape of the 'edges' array (assuming 'edges' is a 2D array or matrix)
-    shape = edges.shape
-
-    # Iterate over rows (y) first
-    for x in range(shape[1]):
-        # Iterate over columns (x)
-        for y in range(shape[0]):
-            # Check if the current row 'y' is between 400 and 500 (exclusive)
-            if 400 < y < 500:
-                # Check if the value of the element at position (y, x) in the 'edges' array is greater than 250
-                if edges[y][x] > 250:
-                    # If the conditions are met, add the coordinate (y, x) to the 'coordinates' list
-                    coordinates.append((y, x))
-
-    "Finding the circle parameter, and drawing the circle"
-    # Calculate the diameter of the circle using the x-coordinates of the last and first elements in the 'coordinates' list
-    diameter = coordinates[-1][1] - coordinates[0][1]
-
-    # Calculate the radius of the circle by dividing the diameter by 2 and converting it to an integer
-    radius = int(diameter / 2)
-
-    # Calculate the x-coordinate of the center of the circle by taking the average of the x-coordinates of the last and first elements in the 'coordinates' list
-    center_x = (coordinates[-1][1] + coordinates[0][1]) / 2
-
-    # Calculate the y-coordinate of the center of the circle by taking the average of the y-coordinates of the last and first elements in the 'coordinates' list
-    center_y = int((coordinates[-1][0] + coordinates[0][0]) / 2)
-
-    # Create a tuple representing the center of the circle as (x, y)
-    center = (int(center_x), int(center_y))
-
-    # Set the color of the circle in BGR format (blue in this example, as (255, 0, 0))
-    color = (255, 0, 0)
-
-    # Create a copy of the original image to draw the circle on
-    image = img.copy()
-
-    # Draw the circle on the image using OpenCV's circle function
-    # center: the center coordinates of the circle
-    # radius: the radius of the circle
-    # color: the color of the circle
-    # thickness: the thickness of the circle outline (set to 2 in this example)
-    cv2.circle(image, center, radius, color, thickness=2)
-
-    # Display the image with the drawn circle using matplotlib
-    plt.imshow(image)
-
-    return center, radius
-
-
 
 def circle_moment(subimg): ## no use
     """https://towardsdatascience.com/computer-vision-for-beginners-part-4-64a8d9856208
@@ -264,7 +269,6 @@ def circle_contour(subimg): ## no use
     cv2.destroyAllWindows()
 
 
-
 def circle_match(path, subimg): ## no use
     gray_img = cv2.cvtColor(subimg, cv2.COLOR_BGR2GRAY)
     ## another way: mathTemplate (refer 04_03.py), collapse to work
@@ -283,7 +287,6 @@ def circle_match(path, subimg): ## no use
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
 #--------------------------------------------------------------------------------
 
 def rescale(img):
@@ -297,12 +300,11 @@ def crop(img):
     subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
     return subimg
 
-# name = r'C:\\Users\\WANGH0M\\Desktop\\opencv\\ball_photos\\0B4A4667.jpg'
 name = './ball_photos/0B4A4656.jpg'
 img = cv2.imread(name,1)
-# img = rescale(img)
-# subimg = crop(img)
-#circle_blob(subimg)
-#circle_Hough(subimg)
 
-circle_canny(img, True)
+#circle_blob(rescale(crop(img)))
+
+#circle_Hough(rescale(crop(img)))
+
+circle_canny(img, True, True, True)

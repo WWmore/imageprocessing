@@ -1,8 +1,9 @@
 import numpy as np
 import cv2
 import glob
+#import matplotlib.pyplot as plt 
 
-from circle_contours import circle_Hough
+from circle_contours import circle_Hough, circle_canny
 from read_files import read_csv
 from crop_patch import crop_image
 
@@ -73,9 +74,8 @@ class RectangularPatch:
         self.rho7 = kwargs.get('rho7')
 
         ### Read 1 image and get the cropped subimg
-        img = self.change_jpg_to_png(path, img)
-        img = self.rescale(img)
-        self.subimg = self.crop(img)
+        subimg = self.crop(img)
+        self.subimg = self.rescale2(subimg, scale_percent=15.625)
         self.subimg_copy = self.subimg.copy()
         
         ### Plot bounding circle
@@ -97,16 +97,29 @@ class RectangularPatch:
         img = cv2.imread(path+'\\1.png',1)
         return img
 
-    def rescale(self, img):
-        ## rescale the photo
-        img = cv2.resize(img, (0,0), fx=0.1, fy=0.1)
-        return img
-
     def crop(self, img):
         ## crop the photo
         num_row, num_col = img.shape[0], img.shape[1]
         subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
         return subimg
+    
+    def rescale(self, img):
+        ## rescale the photo
+        img = cv2.resize(img, (0,0), fx=0.1, fy=0.1)
+        return img
+    
+    def rescale2(self, img, scale_percent=100):
+        #img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+        # Define the scale percentage for resizing the image
+        # 100% means keeping the original size
+        width = int(img.shape[1] * scale_percent / 100)  # Calculate the new width
+        height = int(img.shape[0] * scale_percent / 100)  # Calculate the new height
+        dim = (width, height)  # Create a tuple representing the new dimensions (width, height)
+
+        # Resize the image using the calculated dimensions and interpolation method (INTER_AREA)
+        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+        return img
 
     def convert_grayscale(self, subimg):
         ## convert it to a grayscale image
@@ -114,22 +127,23 @@ class RectangularPatch:
         return gray_img
 
     def get_bounding_circle(self):
-        if False:
+        if True:
             "computed way"
-            center, radius = circle_Hough(self.subimg)
+            #center, radius = circle_Hough(self.subimg)
+            center, radius = circle_canny(self.subimg)
         else:
             "use above function to get a constant circle of the first photo"
             center = np.array([244, 294])
             radius = 212 if self.is_sign==1 else 230
-            # draw the outer circle
-            cv2.circle(self.subimg,center,radius,(0,0,255),2)
-            # draw the center of the circle
-            cv2.circle(self.subimg,center,2,(0,0,255),10)
-            # print(circle[0],circle[1])
 
-            cv2.imshow("Contours",self.subimg)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+        # draw the outer circle
+        cv2.circle(self.subimg,center,radius,(0,0,255),2)
+        # draw the center of the circle
+        cv2.circle(self.subimg,center,2,(0,0,255),10)
+
+        cv2.imshow("Contours",self.subimg)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         return center, radius
 
     def get_boundary_contour(self):
@@ -260,7 +274,6 @@ class RectangularPatch:
         cv2.imshow("Patch" , patch)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
         return patch
 
 
@@ -284,11 +297,11 @@ if __name__ == "__main__":
         if i==0:
             patch = RectangularPatch(path, img, is_drill, **data).patch
             cv2.imwrite(path + "/patch/1.png", patch)  
-        else:
-            pat = RectangularPatch(path, img, is_drill, **data).patch
-            name =  path + "/patch/" + str(i+1)
-            cv2.imwrite(name + ".png", pat)  
-            patch = cv2.hconcat([patch, pat])
+        # else:
+        #     pat = RectangularPatch(path, img, is_drill, **data).patch
+        #     name =  path + "/patch/" + str(i+1)
+        #     cv2.imwrite(name + ".png", pat)  
+        #     patch = cv2.hconcat([patch, pat])
 
 
     cv2.imwrite(path + "/panorama.png", patch)  
