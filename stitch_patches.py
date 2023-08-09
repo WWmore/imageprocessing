@@ -20,6 +20,7 @@ stitch_images(images)
 import numpy as np
 import cv2
 import glob
+#-------------------------------------------------------------------------------
 
 path = './ball_photos/patch'
 
@@ -153,7 +154,7 @@ def panorama1(folder_path):
     return stitch_folder(folder_path)
 
 
-def stitch_images(images):
+def stitch_images(images): ##failed, no match
     "https://www.youtube.com/watch?v=Zs51cg4mb0k"
     imageStitcher = cv2.Stitcher.create()
     error, stitched_img = imageStitcher.stitch(images)
@@ -167,6 +168,13 @@ def stitch_images(images):
         print('error happens')
 
 
+def stitching_images(names): ##failed, no match
+    import stitching
+    settings = {"detector": "sift", "confidence_threshold": 0.2}
+    stitcher = stitching.Stitcher(**settings)
+    panorama = stitcher.stitch(names)
+    return panorama
+#-----------------------------------------------------------------------
 
 if __name__ == "__main__":
 
@@ -185,8 +193,10 @@ if __name__ == "__main__":
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
-    stitch_images(images)
+    #stitch_images(images)
 
-
-    #panorama1(path)
     #panorama1(path+'/only')
+
+    names = [path+'/5.png', path+'/6.png']
+    print(names)
+    stitching_images(names)

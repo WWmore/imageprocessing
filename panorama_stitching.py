@@ -16,7 +16,7 @@ from crop_patch import crop_image
 #-----------------------------------------------------------------------------------
 
 def ReadPatchContour(path, is_drill):
-    path += '/csv_bigpatch'
+    path += '/csv_patch_8strip'
     is_sign = -1 if is_drill else 1
 
     data = {
@@ -49,6 +49,13 @@ def ReadPatchContour(path, is_drill):
 
         'phi7':  read_csv(path, '/patch_list7_phi.csv') * is_sign + np.pi/2,
         'rho7':  read_csv(path, '/patch_list7_r.csv'),
+
+        'phi8':  read_csv(path, '/patch_list8_phi.csv') * is_sign + np.pi/2,
+        'rho8':  read_csv(path, '/patch_list8_r.csv'),
+
+        'phi9':  read_csv(path, '/patch_list9_phi.csv') * is_sign + np.pi/2,
+        'rho9':  read_csv(path, '/patch_list9_r.csv'),
+
     }
 
     return data
@@ -80,6 +87,10 @@ class RectangularPatch:
         self.rho6 = kwargs.get('rho6')
         self.phi7 = kwargs.get('phi7')
         self.rho7 = kwargs.get('rho7')
+        self.phi8 = kwargs.get('phi8')
+        self.rho8 = kwargs.get('rho8')
+        self.phi9 = kwargs.get('phi9')
+        self.rho9 = kwargs.get('rho9')
 
         ### Read 1 image and get the cropped subimg
         subimg = self.crop(img)
@@ -202,7 +213,7 @@ class RectangularPatch:
         crop_image(self.subimg, pts_bdry)
 
 
-    ### Read the 5 lists of points of the extracted patch
+    ### Read the 9 lists of points of the extracted patch
     def get_list_of_pts(self, phi, rho):
         x = (self.radius * rho * np.cos(phi)).astype(int)
         y = (self.radius * rho * np.sin(phi)).astype(int)
@@ -240,6 +251,8 @@ class RectangularPatch:
         pts_list5 = self.get_list_of_pts(self.phi5, self.rho5)
         pts_list6 = self.get_list_of_pts(self.phi6, self.rho6)
         pts_list7 = self.get_list_of_pts(self.phi7, self.rho7)
+        pts_list8 = self.get_list_of_pts(self.phi8, self.rho8)
+        pts_list9 = self.get_list_of_pts(self.phi9, self.rho9)
 
         num = len(pts_list1)
         mid_ind = int(num/2)
@@ -249,7 +262,9 @@ class RectangularPatch:
         width4 = np.linalg.norm(pts_list5[mid_ind]-pts_list4[mid_ind])
         width5 = np.linalg.norm(pts_list6[mid_ind]-pts_list5[mid_ind])
         width6 = np.linalg.norm(pts_list7[mid_ind]-pts_list6[mid_ind])
-        width = int((width1+width2+width3+width4+width5+width6)/6)
+        width7 = np.linalg.norm(pts_list8[mid_ind]-pts_list7[mid_ind])
+        width8 = np.linalg.norm(pts_list9[mid_ind]-pts_list8[mid_ind])
+        width = int((width1+width2+width3+width4+width5+width6+width7+width8)/6)
 
         hgt1 = np.linalg.norm(pts_list1[1:]- pts_list1[:-1], axis=1)
         hgt2 = np.linalg.norm(pts_list2[1:]- pts_list2[:-1], axis=1)
@@ -257,8 +272,10 @@ class RectangularPatch:
         hgt4 = np.linalg.norm(pts_list4[1:]- pts_list4[:-1], axis=1)
         hgt5 = np.linalg.norm(pts_list5[1:]- pts_list5[:-1], axis=1)
         hgt6 = np.linalg.norm(pts_list6[1:]- pts_list6[:-1], axis=1)
-        hgt7 = np.linalg.norm(pts_list7[1:]- pts_list7[:-1], axis=1)        
-        height = int(np.mean((hgt1+hgt2+hgt3+hgt4+hgt5+hgt6+hgt7)/5))
+        hgt7 = np.linalg.norm(pts_list7[1:]- pts_list7[:-1], axis=1)    
+        hgt8 = np.linalg.norm(pts_list8[1:]- pts_list8[:-1], axis=1)
+        hgt9 = np.linalg.norm(pts_list9[1:]- pts_list9[:-1], axis=1)  
+        height = int(np.mean((hgt1+hgt2+hgt3+hgt4+hgt5+hgt6+hgt7+hgt8+hgt7)/5))
         # print(width, height)
 
         ### Merge pieces of rectangular patches together to form 1 big rectangular patch
@@ -272,8 +289,10 @@ class RectangularPatch:
         s4 = self.strip(pts_list4, pts_list5, output_pts, width, height)
         s5 = self.strip(pts_list5, pts_list6, output_pts, width, height)
         s6 = self.strip(pts_list6, pts_list7, output_pts, width, height)
+        s7 = self.strip(pts_list7, pts_list8, output_pts, width, height)
+        s8 = self.strip(pts_list8, pts_list9, output_pts, width, height)
 
-        patch = cv2.hconcat([s1,s2,s3,s4,s5,s6])
+        patch = cv2.hconcat([s1,s2,s3,s4,s5,s6,s7,s8])
 
         # if self.is_sign==1: 
         #   "need to check if the image is flipped horizontally"
@@ -304,12 +323,15 @@ if __name__ == "__main__":
         print(i)
         if i==0:
             patch = RectangularPatch(path, img, is_drill, **data).patch
-            cv2.imwrite(path + "/patch/1.png", patch)  
-        # else:
-        #     pat = RectangularPatch(path, img, is_drill, **data).patch
-        #     name =  path + "/patch/" + str(i+1)
-        #     cv2.imwrite(name + ".png", pat)  
-        #     patch = cv2.hconcat([patch, pat])
+            cv2.imwrite(path + "/patch_8strip/1.png", patch)  
+            a,b = patch.shape[:2]
+            
+        else:
+            pat = RectangularPatch(path, img, is_drill, **data).patch
+            pat = cv2.resize(pat, (b,a), interpolation=cv2.INTER_AREA)
+            name =  path + "/patch_8strip/" + str(i+1)
+            cv2.imwrite(name + ".png", pat)  
+            patch = cv2.hconcat([patch, pat])
 
 
     cv2.imwrite(path + "/panorama.png", patch)  
