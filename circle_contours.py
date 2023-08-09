@@ -48,6 +48,7 @@ def circle_canny(img, is_crop=False, is_scale=False, is_RGB=False):
     #   apertureSize: The size of the Sobel kernel used for edge detection. It can be 3, 5, or 7. A larger value gives smoother edges.
     #   L2gradient: A Boolean flag to specify the gradient magnitude calculation method. If True, L2 norm (Euclidean distance) is used. If False, L1 norm (Manhattan distance) is used.
     # (40,180) is suitable for the image size around (853, 1280)
+    # for drillbit, the number maybe (100, 280), but still not good
     edges = cv2.Canny(img, 40, 180,apertureSize=3, L2gradient=True)
     plt.imshow(edges)
 
@@ -99,7 +100,7 @@ def circle_canny(img, is_crop=False, is_scale=False, is_RGB=False):
     cv2.circle(image, center, radius, color, thickness=2)
 
     # Display the image with the drawn circle using matplotlib
-    plt.imshow(image)
+    #plt.imshow(image)
 
     return center, radius
 #-------------------------------------------------------------------------------------
@@ -313,11 +314,18 @@ if __name__ == "__main__":
         subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
         return subimg
 
-    name = './ball_photos/0B4A4656.jpg'
+
+    if 1:
+        name = './ball_photos/0B4A4656.jpg'
+        is_crop=True
+    else:
+        name = './drill_photos/5.jpg'
+        is_crop=False
+    
     img = cv2.imread(name,1)
 
     #circle_blob(rescale(crop(img)))
 
     #circle_Hough(rescale(crop(img)))
 
-    circle_canny(img, True, True, True)
+    circle_canny(img, is_crop, True, True)

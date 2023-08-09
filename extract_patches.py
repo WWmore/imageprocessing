@@ -92,7 +92,13 @@ class RectangularPatch:
         self.rho9 = kwargs.get('rho9')
 
         ### Read 1 image and get the cropped subimg
-        subimg = self.crop(img)
+        if self.is_sign==1:
+            "ball"
+            subimg = self.crop(img)
+        elif self.is_sign==-1:
+            "drillbit"
+            subimg = self.crop2(img)
+
         self.subimg = self.rescale2(subimg, scale_percent=15.625)
         self.subimg_copy = self.subimg.copy()
         
@@ -121,6 +127,12 @@ class RectangularPatch:
         subimg = img[:, int(num_col*0.2):int(num_col*0.8), :]
         return subimg
     
+    def crop2(self, img):
+        ## crop the photo
+        num_row, num_col = img.shape[0], img.shape[1]
+        subimg = img[:, int(num_col*0.15):int(num_col*0.85), :]
+        return subimg
+    
     def rescale(self, img):
         ## rescale the photo
         img = cv2.resize(img, (0,0), fx=0.1, fy=0.1)
@@ -145,14 +157,15 @@ class RectangularPatch:
         return gray_img
 
     def get_bounding_circle(self):
-        if True:
+        if self.is_sign==1:
             "computed way"
             #center, radius = circle_Hough(self.subimg)
             center, radius = circle_canny(self.subimg)
-        else:
+        elif self.is_sign==-1:
             "use above function to get a constant circle of the first photo"
-            center = np.array([244, 294])
-            radius = 212 if self.is_sign==1 else 230
+            a,b = self.subimg.shape[:2]
+            center = np.array([a//2, b//2])
+            radius = min(a//2, b//2)
 
         # draw the outer circle
         cv2.circle(self.subimg,center,radius,(0,0,255),2)
@@ -293,9 +306,9 @@ class RectangularPatch:
 
         patch = cv2.hconcat([s1,s2,s3,s4,s5,s6,s7,s8])
 
-        # if self.is_sign==1: 
-        #   "need to check if the image is flipped horizontally"
-        #     patch = cv2.flip(patch, 1)
+        if self.is_sign==-1:
+            "need to check if the image is flipped horizontally"
+            patch = cv2.flip(patch, 1)
 
         cv2.imshow("Patch" , patch)
         cv2.waitKey(0)
@@ -308,12 +321,14 @@ if __name__ == "__main__":
 
     if 1:
         path = './ball_photos'
+        path_csv = './csv/csv_patch_8strip'
         is_drill = False
     else:
         path = './drill_photos'
+        path_csv = './csv/csv_patch_side_8strip'
         is_drill = True
 
-    data = ReadPatchContour('./csv/csv_patch_8strip', is_drill)
+    data = ReadPatchContour(path_csv, is_drill)
     
     images = [cv2.imread(file) for file in glob.glob(path+"/*.jpg")]
     images = images[::-1]
