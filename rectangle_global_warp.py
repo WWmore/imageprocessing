@@ -4,6 +4,7 @@ https://github.com/XiaohanYE99/Rectangling-Panoramic-Images-via-Warping/tree/mas
 import cv2
 import numpy as np
 import scipy.sparse.linalg as sla
+from scipy import sparse
 
 pi = np.arccos(-1.0)
 #
@@ -327,11 +328,15 @@ def global_warp(img, disimg, mask, output):
         cv2.waitKey()
         cv2.destroyAllWindows()
 
+    #----------------------------------------------------------------------------
+    #----------------------------------------------------------------------------
+    #----------------------------------------------------------------------------
+    #----------------------------------------------------------------------------
+
     line_num = len(lines)
     num = np.zeros((y_num, x_num))
     #lineSeg = [[0 for x in range(x_num)] for y in range(y_num)] ##Hui: note delete -1
-    #lineSeg = np.zeros((y_num, x_num, 5)) ##Bug
-    lineSeg = []
+    lineSeg = [[[] for x in range(x_num)] for y in range(y_num)] ##Hui changed
 
     for i in range(line_num):
         aline = np.zeros((2,2), dtype=np.int32)
@@ -390,20 +395,27 @@ def global_warp(img, disimg, mask, output):
                     now_y += dir[k][1]
                     pnow = p.copy()
                     break
-            mat_t = np.r_[pst[0], pen[0], np.zeros(1)] ## array of lenth 5
+                
+            #print(now_x, now_y)
+            mat_t = list(np.r_[pst[0], pen[0], np.zeros(1)]) ## array of lenth 5
             if now_x > x_num or now_y > y_num or now_x < 0 or now_y < 0:
                 break
             if num[now_y][now_x] == 0:
                 lineSeg[now_y][now_x] = mat_t.copy()
                 num[now_y][now_x] += 1
             else:
-                lineSeg[now_y][now_x] = np.vstack((lineSeg[now_y][now_x], mat_t)) ##Bug
+                # lineSeg[now_y][now_x] = np.vstack((lineSeg[now_y][now_x], mat_t))
+                lineSeg[now_y][now_x] = np.vstack((lineSeg[now_y][now_x], mat_t)).tolist() ##Hui:change
+
             pst = pnow.copy()
             pnow = pen.copy()
             if isin == 1:
                 break
             if ok == 0:
                 break
+
+    # print(lineSeg)
+
 
     #/****************shape mat***********************************/
     quadrows = y_num - 1
@@ -450,21 +462,40 @@ def global_warp(img, disimg, mask, output):
             S = blkdiag(S, Si, S)
     print(np.transpose(Q) @ Q)
 
+
+
     # #/************get theta**********************/
     delta = np.pi/49
-    quad_theta = [[0 for x in range(quadcols)] for y in range(quadrows)] 
-    quad_bin = [[0 for x in range(quadcols)] for y in range(quadrows)] 
+    quad_theta = [[[] for x in range(quadcols)] for y in range(quadrows)] ##Hui: change from 0 to []
+    quad_bin = [[[] for x in range(quadcols)] for y in range(quadrows)]  ##Hui: change from 0 to []
     for i in range(quadrows):
         for j in range(quadcols):
-            quadseg = lineSeg[i][j]
-            lineN = quadseg.shape[0]
+            #quadseg = lineSeg[i][j] ##bug
+            quadseg = list(filter(None, lineSeg[i][j])) ##Hui: change
+            # print(i,j,quadseg)
+            if len(quadseg)==0: ##Hui: add
+                continue
+            if isinstance(quadseg[0], list) is False:
+                "if the first element is not a list, that not 2-D"
+                lineN = 1
+            else:
+                lineN = len(quadseg)
+
+           # print(quadseg, lineN)
+
             quad_bin[i][j] = []
             quad_theta[i][j] = []
             for k in range(lineN):
-                pst_x = quadseg[k,1]
-                pst_y = quadseg[k,0]
-                pen_x = quadseg[k,3]
-                pen_y = quadseg[k,2]
+                if lineN ==1: ##add by Hui
+                    pst_x = quadseg[1] ##Bug
+                    pst_y = quadseg[0]
+                    pen_x = quadseg[3]
+                    pen_y = quadseg[2]
+                else:
+                    pst_x = quadseg[k][1] ##Bug
+                    pst_y = quadseg[k][0]
+                    pen_x = quadseg[k][3]
+                    pen_y = quadseg[k][2]
                 angle = np.pi/2 if pst_x == pen_x else np.arctan(float(pst_y-pen_y)/(pst_x-pen_x))
                 theta = int((angle+np.pi/2)/delta)
                 quad_theta[i][j].append(angle)
@@ -512,14 +543,29 @@ def global_warp(img, disimg, mask, output):
         #/*********************line mat*********************/
         for i in range(quadrows):
             for j in range(quadcols):
-                lineN = lineSeg[i][j].shape[0]
+
+                quadseg = list(filter(None, lineSeg[i][j])) ##Hui: add
+                if len(quadseg)==0: ##Hui: add
+                    continue
+                if isinstance(quadseg[0], list) is False:
+                    "if the first element is not a list, that not 2-D"
+                    lineN = 1
+                else:
+                    lineN = len(quadseg)
+
                 NL += lineN
                 for k in range(lineN):
                     vx, vy = getvertices(i, j, warp_ygrid, warp_xgrid, vx, vy)
-                    pst[0, 0] = lineSeg[i][j][k, 0]
-                    pst[1, 0] = lineSeg[i][j][k, 1]
-                    pen[0, 0] = lineSeg[i][j][k, 2]
-                    pen[1, 0] = lineSeg[i][j][k, 3]
+                    if lineN ==1: ##add by Hui
+                        pst[0, 0] = quadseg[0]
+                        pst[1, 0] = quadseg[1]
+                        pen[0, 0] = quadseg[2]
+                        pen[1, 0] = quadseg[3]
+                    else:
+                        pst[0, 0] = quadseg[k][0]
+                        pst[1, 0] = quadseg[k][1]
+                        pen[0, 0] = quadseg[k][2]
+                        pen[1, 0] = quadseg[k][3]
                     T1, T2 = None, None
                     # trans_mat(vx, vy, pst, T1)
                     # trans_mat(vx, vy, pen, T2)
@@ -528,7 +574,10 @@ def global_warp(img, disimg, mask, output):
                     flgg = getLinTrans(pen[0, 0], pen[1, 0], vy, vx, T2, flgg)
                     TT[i][j].append(T1)
                     TT[i][j].append(T2)
-                    theta = lineSeg[i][j][k, 4]
+                    if lineN ==1: ##add by Hui
+                        theta = 0 ## quadseg[4]
+                    else:
+                        theta = 0 ##quadseg[k][4] ##Hui guess it's 0
                     R[0, 0] = np.cos(theta)
                     R[0, 1] = -np.sin(theta)
                     R[1, 0] = np.sin(theta)
@@ -536,7 +585,7 @@ def global_warp(img, disimg, mask, output):
                     e[0, 0] = pen[1, 0] - pst[1, 0]
                     e[1, 0] = pen[0, 0] - pst[0, 0]
                     I = np.eye(2, 2, dtype=np.float32)
-                    C = (R * e * np.linalg.inv(e.T * e) * e.T * R.T - I) * (T2 - T1)  # C*V
+                    C = (R * e * np.linalg.inv(e.T * e) * e.T * R.T - I) * (T2 - T1)  # C*V ##bug: singular matrix
                     # print(Cmatrixes_flag[i][j])
                     # print(C)
                     if Cmatrixes_flag[i][j] == 0:
@@ -544,6 +593,9 @@ def global_warp(img, disimg, mask, output):
                         Cmatrixes_flag[i][j] += 1
                     else:
                         Cmatrixes[i][j] = np.vstack((Cmatrixes[i][j], C))
+
+        if NL==0: ##Hui add
+            break
 
         L = None
         L_flag = 0
@@ -555,7 +607,16 @@ def global_warp(img, disimg, mask, output):
             n = 0
             Li = None
             for j in range(quadcols):
-                lineN = lineSeg[i][j].shape[0]
+
+                quadseg = list(filter(None, lineSeg[i][j])) ##Hui: add
+                if len(quadseg)==0: ##Hui: add
+                    continue
+                if isinstance(quadseg[0], list) is False:
+                    "if the first element is not a list, that not 2-D"
+                    lineN = 1
+                else:
+                    lineN = len(quadseg)
+
                 if lineN == 0:
                     if Li_flag != 0:
                         x = np.zeros((Li.shape[0], 8), dtype=np.float32)
@@ -588,24 +649,43 @@ def global_warp(img, disimg, mask, output):
                 else:
                     L = blkdiag(L, Li, L)
         
+
+
         Nq = quadrows*quadcols
         lambl = 1
         lambB = 1e8
-        S_matrix, Q_matrix, L_matrix,Dg_matrix = cv2.cv2eigen(S, Q, L, Dg)
-        S1 = S_matrix.sparseView()
-        Q1 = Q_matrix.sparseView()
-        L1 = L_matrix.sparseView()
-        Dg1 = Dg_matrix.sparseView()
+
+        if 0:##Hui: original
+            S_matrix = cv2.eigen(S)
+            Q_matrix = cv2.eigen(Q)
+            L_matrix = cv2.eigen(L)
+            Dg_matrix = cv2.eigen(Dg)
+            S1 = S_matrix.sparseView()
+            Q1 = Q_matrix.sparseView()
+            L1 = L_matrix.sparseView()
+            Dg1 = Dg_matrix.sparseView()
+        else: ##changed by Hui
+            S1 = sparse.csr_matrix(S) 
+            Q1 = sparse.csr_matrix(Q) 
+            L1 = sparse.csr_matrix(L) 
+            Dg1 = sparse.csr_matrix(Dg)
+
         x1_matrix = (1.0/Nq)*S1*Q1
         x2_matrix = (lambl/NL)*L1*Q1
-        x3_matrix = lambB*Dg1
-        x1, x2, x3 = cv2.eigen2cv(x1_matrix, x2_matrix, x3_matrix)
-        K = np.vstack((x1, x2))
-        K = np.vstack((K, x3))
+        x3_matrix = lambB*Dg1 
+
+        x1 = cv2.eigen(x1_matrix) ##Hui: change from eigen2cv to cv2.eigen
+        x2 = cv2.eigen(x2_matrix)
+        x3 = cv2.eigen(x3_matrix)
+
+        K = np.vstack((x1, x2, x3))
         BA = np.vstack((np.zeros((K.shape[0] - B.shape[0], 1)), lambB*B))
-        K_matrix,BA_matrix = cv2.cv2eigen(K, BA)
+
+        K_matrix = cv2.eigen(K)
+        BA_matrix = cv2.eigen(BA)
         K1 = K_matrix.sparseView()
         BA1 = BA_matrix.sparseView()
+        
         A_matrix = K1.transpose()*K1
         b_matrix = K1.transpose()*BA1
         A = A_matrix.sparseView()
@@ -632,7 +712,16 @@ def global_warp(img, disimg, mask, output):
         rot_sum = [0] * 55
         for i in range(quadrows):
             for j in range(quadcols):
-                lineN = lineSeg[i][j].shape[0]
+
+                quadseg = list(filter(None, lineSeg[i][j])) ##Hui: add
+                if len(quadseg)==0: ##Hui: add
+                    continue
+                if isinstance(quadseg[0], list) is False:
+                    "if the first element is not a list, that not 2-D"
+                    lineN = 1
+                else:
+                    lineN = len(quadseg)
+
                 vx, vy = getvertices(i, j, new_ygrid, new_xgrid, vx, vy)
                 for k in range(lineN):
                     if bad[i][j][k]:
@@ -661,7 +750,16 @@ def global_warp(img, disimg, mask, output):
                 rot_sum[i] = rot_sum[i] / bin_num[i]
         for i in range(quadrows):
             for j in range(quadcols):
-                lineN = lineSeg[i][j].shape[0]
+
+                quadseg = list(filter(None, lineSeg[i][j])) ##Hui: add
+                if len(quadseg)==0: ##Hui: add
+                    continue
+                if isinstance(quadseg[0], list) is False:
+                    "if the first element is not a list, that not 2-D"
+                    lineN = 1
+                else:
+                    lineN = len(quadseg)
+
                 for k in range(lineN):
                     lineSeg[i][j][k,4] = rot_sum[quad_bin[i][j][k]]
 
