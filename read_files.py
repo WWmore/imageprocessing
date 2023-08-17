@@ -8,9 +8,9 @@ import numpy as np
 import csv 
 #-----------------------------------------------------------------------
 
-def read_csv(path0, name):
+def read_csv(name):
     arrays = []
-    with open(path0+name, 'r') as f:
+    with open(name, 'r') as f:
         reader = csv.reader(f, delimiter=',') 
         for row in reader: 
             # print(row, len(row))

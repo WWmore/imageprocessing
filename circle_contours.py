@@ -49,6 +49,9 @@ def circle_canny(img, is_crop=False, is_scale=False, is_RGB=False):
     #   L2gradient: A Boolean flag to specify the gradient magnitude calculation method. If True, L2 norm (Euclidean distance) is used. If False, L1 norm (Manhattan distance) is used.
     # (40,180) is suitable for the image size around (853, 1280)
     # for drillbit, the number maybe (100, 280), but still not good
+
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # img = cv2.GaussianBlur(gray, (3, 3), 0)
     edges = cv2.Canny(img, 40, 180,apertureSize=3, L2gradient=True)
     plt.imshow(edges)
 
@@ -316,15 +319,15 @@ if __name__ == "__main__":
 
 
     if 1:
-        name = './ball_photos/0B4A4656.jpg'
+        name = './photos_ball/top/0B4A4656.jpg'
         is_crop=True
     else:
-        name = './drill_photos/5.jpg'
+        name = './photos_drill/5.jpg'
         is_crop=False
     
     img = cv2.imread(name,1)
 
-    #circle_blob(rescale(crop(img)))
+    #circle_blob(rescale(cropT(img)))
 
     #circle_Hough(rescale(crop(img)))
 

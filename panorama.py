@@ -11,18 +11,10 @@ import glob
 from stitching import AffineStitcher
 #-----------------------------------------------------------------------------------
 
+paths = ['./photos_ball', './photos_drill', './photos_apple', './photos_cup']
+path = paths[2] ### need to choose the path name
 
-# print(AffineStitcher.AFFINE_DEFAULTS)
-# Comparison:
-# print(Stitcher.DEFAULT_SETTINGS)
-# print(AffineStitcher.DEFAULT_SETTINGS).
-
-if 1:
-    path = './ball_photos'
-else:
-    path = './drill_photos'
-
-names = [file for file in glob.glob(path+"/patch_8strip/*.png")]
+names = [file for file in glob.glob(path+"/rectangle/*.png")]
 
 settings = {# The whole plan should be considered
         "crop": False,
