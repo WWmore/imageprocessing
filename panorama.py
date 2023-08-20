@@ -11,15 +11,15 @@ import glob
 from stitching import AffineStitcher
 #-----------------------------------------------------------------------------------
 
-paths = ['./photos_ball', './photos_drill', './photos_apple', './photos_cup']
-path = paths[2] ### need to choose the path name
+paths = ['./photos_ball/top','./photos_ball/front', './photos_drill/front', './photos_apple', './photos_cup']
+path = paths[1] ### need to choose the path name
 
 names = [file for file in glob.glob(path+"/rectangle/*.png")]
 
 settings = {# The whole plan should be considered
-        "crop": False,
+        "crop": False, ##need to choose
         # The matches confidences aren't that good
-        "confidence_threshold": 0.5}    
+        "confidence_threshold": 0.4} ##Hui: number need be carefully chosen
 
 stitcher = AffineStitcher(**settings)
 
@@ -27,7 +27,7 @@ panorama = stitcher.stitch(names)
 
 "!NOTE: for both ways below, different time, the running result maybe different"
 if 1:
-    #cv2.imwrite(path + "/panorama_8strips.png", panorama)  
+    cv2.imwrite(path + "/panorama.png", panorama)  
     cv2.imshow("Panorama" , panorama)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

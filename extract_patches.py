@@ -36,9 +36,9 @@ class RectangularPatch:
         self.phi_bdry, self.rho_bdry = kwargs.get('bdry')
 
         ### Read 1 image and get the cropped subimg
-        subimg = self.crop(img)
+        #img = self.crop(img) ##Hui: need to check
 
-        self.subimg = self.rescale2(subimg, scale_percent=15.625)
+        self.subimg = self.rescale2(img, scale_percent=15.625)
         #self.subimg = self.rescale3(img)
         subimg_copy = self.subimg.copy()
         
@@ -106,7 +106,7 @@ class RectangularPatch:
         if 1:
             "computed way"
             #center, radius = circle_Hough(self.subimg)
-            center, radius = circle_canny(self.subimg)
+            center, radius = circle_canny(self.subimg,ynum1=450,ynum2=550)
         else:
             "use above function to get a constant circle of the first photo"
             a,b = self.subimg.shape[:2]
@@ -222,16 +222,13 @@ class RectangularPatch:
 #------------------------------------------------------------------------------------------
 if __name__ == "__main__":
 
-    if 0:
-        path = './photos_ball/top'
-        path_csv = './csv/csv_patch_8strip'
-    elif 1:
-        path = './photos_ball/front'
-        path = './photos_apple'
-        path_csv = './csv/csv_half_14strip'    
-    elif 0:
-        path = './photos_drill'
-        path_csv = './csv/csv_patch_side_8strip'
+    paths = ['./photos_ball/top','./photos_ball/front', 
+             './photos_drill/top', './photos_drill/front',
+             './photos_apple', './photos_cup']
+    path = paths[2] ### need to choose the path name
+
+    path_csvs = ['./csv/csv_patch_8strip','./csv/csv_half_14strip']
+    path_csv = path_csvs[1]
 
     data = ReadPatchContour(path_csv)
     
@@ -245,17 +242,17 @@ if __name__ == "__main__":
             cv2.imwrite(path + "/rectangle/1.png", patch)  
             a,b = patch.shape[:2]
 
-        # else:
-        #     pat = RectangularPatch(path, img, **data).patch
-        #     pat = cv2.resize(pat, (b,a), interpolation=cv2.INTER_AREA)
-        #     name =  path + "/rectangle/" + str(i+1)
-        #     cv2.imwrite(name + ".png", pat)  
-        #     patch = cv2.hconcat([patch, pat])
+        else:
+            pat = RectangularPatch(path, img, **data).patch
+            pat = cv2.resize(pat, (b,a), interpolation=cv2.INTER_AREA)
+            name =  path + "/rectangle/" + str(i+1)
+            cv2.imwrite(name + ".png", pat)  
+            patch = cv2.hconcat([patch, pat])
 
 
-    cv2.imwrite(path + "/stitching.png", patch)  
-    cv2.imshow("Stitching" , patch)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imwrite(path + "/stitching.png", patch)  
+    # cv2.imshow("Stitching" , patch)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 

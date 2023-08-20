@@ -14,7 +14,7 @@ import cv2
 import matplotlib.pyplot as plt 
 #-------------------------------------------------------------------------------------
 
-def circle_canny(img, is_crop=False, is_scale=False, is_RGB=False):
+def circle_canny(img, ynum1=400,ynum2=500, is_crop=False, is_scale=False, is_RGB=False):
     """Use the Canny edge detection algorithm to detect edges in the image,
     then search for the left boundary-edge and right boundary-edge to rebuld the circle
     """
@@ -67,7 +67,7 @@ def circle_canny(img, is_crop=False, is_scale=False, is_RGB=False):
         # Iterate over columns (x)
         for y in range(shape[0]):
             # Check if the current row 'y' is between 400 and 500 (exclusive)
-            if 400 < y < 500:
+            if ynum1 < y < ynum2:
                 # Check if the value of the element at position (y, x) in the 'edges' array is greater than 250
                 if edges[y][x] > 250:
                     # If the conditions are met, add the coordinate (y, x) to the 'coordinates' list
@@ -331,4 +331,4 @@ if __name__ == "__main__":
 
     #circle_Hough(rescale(crop(img)))
 
-    circle_canny(img, is_crop, True, True)
+    circle_canny(img, is_crop=is_crop, is_scale=True, is_RGB=True)
