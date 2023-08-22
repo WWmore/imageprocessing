@@ -11,15 +11,17 @@ import glob
 from stitching import AffineStitcher
 #-----------------------------------------------------------------------------------
 
-paths = ['./photos_ball/top','./photos_ball/front', './photos_drill/front', './photos_apple', './photos_cup']
-path = paths[1] ### need to choose the path name
+paths = ['./photos_ball/top','./photos_ball/front', 
+             './photos_drill/top', './photos_drill/front','./photos_drill/every5',
+             './photos_apple', './photos_cup']
+path = paths[5] ### need to choose the path name
 
 names = [file for file in glob.glob(path+"/rectangle/*.png")]
 
 settings = {# The whole plan should be considered
         "crop": False, ##need to choose
         # The matches confidences aren't that good
-        "confidence_threshold": 0.4} ##Hui: number need be carefully chosen
+        "confidence_threshold": 0.5} ##Hui: number need be carefully chosen
 
 stitcher = AffineStitcher(**settings)
 

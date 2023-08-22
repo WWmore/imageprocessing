@@ -223,9 +223,9 @@ class RectangularPatch:
 if __name__ == "__main__":
 
     paths = ['./photos_ball/top','./photos_ball/front', 
-             './photos_drill/top', './photos_drill/front',
+             './photos_drill/top', './photos_drill/front','./photos_drill/every5',
              './photos_apple', './photos_cup']
-    path = paths[2] ### need to choose the path name
+    path = paths[5] ### need to choose the path name
 
     path_csvs = ['./csv/csv_patch_8strip','./csv/csv_half_14strip']
     path_csv = path_csvs[1]
