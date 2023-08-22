@@ -1,14 +1,15 @@
-# imageprocessing
+# imageprocessing by Hui
 
 ## File notes:
-1. panorama_stitching.py: the main file, which will call circle_contours.py, crop_patch.py, read_files.py.
-2. circle_controus.py: several ways to extract circles as contours, but only circle_Hough() is useful in this case.
+1. extract_patches.py: the main file, which will call circle_contours.py, crop_patch.py, read_files.py. It will produced rectangular patches which are to be stitched in panorama.py file.
+2. circle_controus.py: several ways to extract circles as contours. It seems circle_canny() is helpful in this case, but be carefuly for the parameters chosen, otherwise the bounding contour is not good by eyes.
 3. crop_patch.py: crop the spherical patch.
 4. read_files.py: read the .csv files in folder ball_photos.
-5. folder ball_photos: 8 chosen photos with constant speed; computed polyline-points from Grasshopper (shoud be moved into python code).
+5. folder photos_ball: 8 chosen photos with constant speed were chosen for both 'Top' view and 'Front' view; computed polyline-points (.csv) from Grasshopper (shoud be saved in csv/csv_patch_xstrip folder).
 6. folder docs: some funtions related to OpenCV, Skimage, Pillow in folder else.
 7. folder else: some prepared / learning files (in fact, no use).
-8. Jupyter file Ball photos stitching.ipynb: the initial test version (please refer the panorama_stitching.py file).
+8. Jupyter file "Ball photos stitching.ipynb": the test version of the extract_patches.py file.
+9. Jupyter file "AffineStitch.ipynb": the test version of the panorama.py file.
 
 
 ## install by anaconda on Windows
