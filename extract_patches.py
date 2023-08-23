@@ -118,9 +118,9 @@ class RectangularPatch:
         # draw the center of the circle
         cv2.circle(self.subimg,center,2,(0,0,255),10)
 
-        cv2.imshow("Contours",self.subimg)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.imshow("Contours",self.subimg)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return center, radius
 
     def get_boundary_contour(self):
@@ -138,8 +138,8 @@ class RectangularPatch:
         
         # Displaying the image (Note these polys will appear in the later extracted-subimg)
         cv2.imshow('Boundary', bdry)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return pts_bdry
     
     def get_rectangle_patch(self, subimg_copy, center, radius, **kwargs):
@@ -194,8 +194,8 @@ class RectangularPatch:
                 h += np.linalg.norm(pts_list[j][1:]- pts_list[j][:-1], axis=1)
             height = int(np.mean(h)/5) ### should be int, 5 is an chosen int
         else:
-            "choose the ratio of [all_width: all_height] = [1:1.2]"
-            height = int(width * numw / numh * 1.2)
+            "choose the ratio of [all_width: all_height] = [1:1.0]"
+            height = int(width * numw / numh * 1)
         #print(width, height)
 
         ### Merge pieces of rectangular patches together to form 1 big rectangular patch
@@ -227,8 +227,8 @@ if __name__ == "__main__":
              './photos_apple', './photos_cup']
     path = paths[5] ### need to choose the path name
 
-    path_csvs = ['./csv/csv_patch_8strip','./csv/csv_half_14strip']
-    path_csv = path_csvs[1]
+    path_csvs = ['./csv/csv_patch_8strip','./csv/csv_patch_10strip','./csv/csv_half_14strip']
+    path_csv = path_csvs[1] ### need to choose the csv folder
 
     data = ReadPatchContour(path_csv)
     
@@ -239,18 +239,19 @@ if __name__ == "__main__":
         print(i)
         if i==0:
             patch = RectangularPatch(path, img, **data).patch
-            cv2.imwrite(path + "/rectangle/1.png", patch)  
+            #cv2.imwrite(path + "/rectangle/1.png", patch)  
             a,b = patch.shape[:2]
 
         else:
             pat = RectangularPatch(path, img, **data).patch
             pat = cv2.resize(pat, (b,a), interpolation=cv2.INTER_AREA)
             name =  path + "/rectangle/" + str(i+1)
-            cv2.imwrite(name + ".png", pat)  
+            #cv2.imwrite(name + ".png", pat)  
             patch = cv2.hconcat([patch, pat])
 
 
-    # cv2.imwrite(path + "/stitching.png", patch)  
+    ### Directly put the patches together, not a panorama
+    ## cv2.imwrite(path + "/stitching.png", patch)  
     # cv2.imshow("Stitching" , patch)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()

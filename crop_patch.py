@@ -34,5 +34,5 @@ def crop_image(img, pts):
 
     cv2.imshow("cropped" , cropped)
     cv2.imshow("white background" , dst2)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()

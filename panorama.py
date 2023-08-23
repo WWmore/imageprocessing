@@ -18,16 +18,17 @@ path = paths[5] ### need to choose the path name
 
 names = [file for file in glob.glob(path+"/rectangle/*.png")]
 
-settings = {# The whole plan should be considered
-        "crop": False, ##need to choose
-        # The matches confidences aren't that good
-        "confidence_threshold": 0.5} ##Hui: number need be carefully chosen
+ ##Hui Note: below number need be carefully chosen, ussually from 0.4-0.6
+ ##different run even at the same settings may get different panorams, need choose
+settings = {"crop": False, ##need to choose
+            # The matches confidences aren't that good
+            "confidence_threshold": 0.5}
 
 stitcher = AffineStitcher(**settings)
 
 panorama = stitcher.stitch(names)
 
-"!NOTE: for both ways below, different time, the running result maybe different"
+ ##Hui Note:  for both ways below, different time, the running result maybe different
 if 1:
     cv2.imwrite(path + "/panorama.png", panorama)  
     cv2.imshow("Panorama" , panorama)
