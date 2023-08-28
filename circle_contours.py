@@ -273,6 +273,18 @@ def circle_contour(subimg): ## no use
     thresh = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 115, 1)
     cv2.imshow("Binary", thresh)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Loop through the contours and calculate the area of each object
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+    
+        # Draw a bounding box around each
+        # object and display the area on the image
+        x, y, w, h = cv2.boundingRect(cnt)
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.putText(img, str(area), (x, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    
     img2 = subimg.copy()
     index = -1
     thickness = 4
@@ -331,4 +343,6 @@ if __name__ == "__main__":
 
     #circle_Hough(rescale(crop(img)))
 
-    circle_canny(img, is_crop=is_crop, is_scale=True, is_RGB=True)
+    # circle_contour(rescale(crop(img)))
+
+    #circle_canny(img, is_crop=is_crop, is_scale=True, is_RGB=True)
