@@ -2,6 +2,8 @@
 import cv2
 from yolo_segmentation import YOLOSegmentation
 
+from waistline import Levelset
+
 # Load image
 paths = ["images/rugby.jpg","images/basket.jpg","images/1I6A4487.jpg"]
 i = 2
